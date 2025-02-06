@@ -1,0 +1,20 @@
+### Editor
+/.ide/
+/.idea/
+/.phpstorm.meta.php/
+*.code-workspace
+
+### Dev
+/vendor
+/node_modules
+/*.cache
+/*.lock
+/*.css
+/index.php
+/package-lock.json
+
+### Symfony
+/var
+/public/cache
+/public/build
+.env
