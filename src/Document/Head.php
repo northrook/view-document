@@ -7,7 +7,6 @@ namespace Core\View\Document;
 use Core\View\Html\Element;
 use Stringable;
 use InvalidArgumentException;
-use function String\hashKey;
 
 /**
  * @internal
@@ -162,7 +161,9 @@ final class Head implements Stringable
 
     public function injectHtml( string|Stringable $html, ?string $key = null ) : self
     {
-        $key              ??= $html instanceof Stringable ? $html::class.\spl_object_id( $html ) : hashKey( $html );
+        $key ??= $html instanceof Stringable
+                ? $html::class.\spl_object_id( $html )
+                : \hash( 'xxh3', $html );
         $this->head[$key] ??= (string) $html;
         return $this;
     }

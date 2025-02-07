@@ -7,8 +7,6 @@ namespace Core\View;
 use Core\View\Template\View;
 use Psr\Log\LoggerInterface;
 
-// This is where we format the output HTML
-
 class DocumentView extends View
 {
     protected bool $contentOnly = false;
