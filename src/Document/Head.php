@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\View\Document;
 
+use Core\View\Html\Element;
 use Stringable;
 use InvalidArgumentException;
 use function String\hashKey;
@@ -14,22 +15,39 @@ use function String\hashKey;
  */
 final class Head implements Stringable
 {
-    /** @var array<array-key, null|array<array-key, null|bool|string>|bool|string> */
-    private array $head = [];
+    private const array SINGLE_META = ['charset', 'viewport', 'description', 'keywords', 'author'];
 
-    private array $robots = [];
+    protected ?string $title = null;
+
+    protected ?string $description = null;
+
+    protected array $keywords = [];
+
+    protected ?string $author = null;
+
+    /** @var string[] */
+    protected array $styles = [];
+
+    /** @var string[] */
+    protected array $scripts = [];
+
+    /** @var string[] */
+    protected array $links = [];
+
+    /** @var array<array-key, array<array-key, null|bool|string>|string> */
+    private array $head = [];
 
     public function __construct() {}
 
     public function title( string $set ) : self
     {
-        $this->head['title'] = $set;
+        $this->title = $set;
         return $this;
     }
 
     public function description( string $set ) : self
     {
-        $this->head['description'] = $set;
+        $this->description = $set;
         return $this;
     }
 
@@ -40,10 +58,16 @@ final class Head implements Stringable
      */
     public function keywords( string ...$add ) : self
     {
-        // $value = \implode( ', ', (array) $value );
+        // Single line, remove any HTML tags
+        $string = \strip_tags( \implode( ' ', $add ) );
+        // Only use word characters and whitespace
+        $string = (string) \preg_replace( "/[^\w\s+$]/u", '', $string );
+        // Remove unnecessary whitespace
+        $keywords = (string) \preg_replace( "#\s+#", ' ', $string );
 
-        foreach ( $add as $keyword ) {
-            $this->robots[$keyword] = $keyword;
+        // Explode and parse each
+        foreach ( \explode( ' ', \strtolower( $keywords ) ) as $keyword ) {
+            $this->keywords[$keyword] ??= $keyword;
         }
 
         return $this;
@@ -51,7 +75,7 @@ final class Head implements Stringable
 
     public function author( string $set ) : self
     {
-        $this->head['description'] = $set;
+        $this->author = $set;
         return $this;
     }
 
@@ -62,7 +86,7 @@ final class Head implements Stringable
         foreach ( $set as $attribute => $value ) {
             if ( \is_int( $attribute ) ) {
                 $message = 'Document Meta attributes must use named arguments.';
-                throw new InvalidArgumentException();
+                throw new InvalidArgumentException( $message );
             }
             $attribute        = \str_replace( [' ', '_'], '-', \trim( $attribute ) );
             $attribute        = \strtolower( (string) \preg_replace( '/(?<!^)[A-Z]/', '_$0', $attribute ) );
@@ -70,7 +94,7 @@ final class Head implements Stringable
         }
 
         if ( \array_key_exists( 'name', $meta ) ) {
-            $this->head['name'] = $meta;
+            $this->head[$name] = $meta;
         }
         else {
             $this->head[] = $meta;
@@ -79,45 +103,62 @@ final class Head implements Stringable
         return $this;
     }
 
-    protected function metaHtml( ?string $name = null, string ...$set ) : void
-    {
-        $key  = $name;
-        $meta = '<meta';
-
-        if ( $name ) {
-            $meta .= " name=\"{$name}\"";
+    /**
+     * @param ?string                                   $href
+     * @param ?string                                   $inline
+     * @param null|array<array-key, string>|bool|string ...$attributes
+     *
+     * @return $this
+     */
+    public function styles(
+        ?string                   $href = null,
+        ?string                   $inline = null,
+        string|bool|array|null ...$attributes,
+    ) : self {
+        if ( ! ( $href ?? $inline ) ) {
+            throw new InvalidArgumentException( __METHOD__.' requires either $src or $inject.' );
         }
 
-        // if ( $content ) {
-        //     $meta .= " content=\"{$content}\"";
-        // }
+        $this->styles[] = Element::style( $href, $inline, ...$attributes );
 
-        foreach ( $set as $property => $content ) {
-            if ( \is_int( $property ) ) {
-                if ( 0 === $property && ! \array_key_exists( 'content', $set ) ) {
-                    $property = 'content';
-                }
-                else {
-                    throw new InvalidArgumentException( 'Named arguments only' );
-                }
-            }
-
-            $property = \str_replace( '_', '-', $property );
-
-            $key  .= ".{$property}";
-            $meta .= " {$property}=\"{$content}\"";
-        }
-        $meta .= '/>';
-
-        $key = \trim( (string) $key, " \n\r\t\v\0." );
-
-        $this->head[$key] = $meta;
+        return $this;
     }
 
-    // public function robots()
-    // {
-    //
-    // }
+    /**
+     * @param ?string                                   $src
+     * @param ?string                                   $inline
+     * @param null|array<array-key, string>|bool|string ...$attributes
+     *
+     * @return $this
+     */
+    public function script(
+        ?string                   $src = null,
+        ?string                   $inline = null,
+        string|bool|array|null ...$attributes,
+    ) : self {
+        if ( ! ( $src ?? $inline ) ) {
+            throw new InvalidArgumentException( __METHOD__.' requires either $src or $inject.' );
+        }
+
+        $this->scripts[] = Element::script( $src, $inline, ...$attributes );
+
+        return $this;
+    }
+
+    /**
+     * @param string                                    $href
+     * @param null|array<array-key, string>|bool|string ...$attributes
+     *
+     * @return $this
+     */
+    public function link(
+        string                    $href,
+        string|bool|array|null ...$attributes,
+    ) : Head {
+        $this->scripts[] = Element::link( $href, ...$attributes );
+
+        return $this;
+    }
 
     public function injectHtml( string|Stringable $html, ?string $key = null ) : self
     {
@@ -127,21 +168,86 @@ final class Head implements Stringable
     }
 
     /**
-     * @return string[]
+     * @return array<array-key, string>
      */
     public function array() : array
     {
-        return $this->head;
+        $head = [
+            'charset'  => '<meta charset="utf-8">',
+            'viewport' => null,
+            ...$this->getDocumentMeta(),
+        ];
+
+        foreach ( $this->head as $key => $meta ) {
+            // Generate a valid key to prevent duplication
+            if ( \is_int( $key ) ) {
+                $key = \is_array( $meta ) ? \implode( '.', \array_keys( $meta ) ) : $meta;
+            }
+
+            $unique   = \in_array( $key, $this::SINGLE_META, true );
+            $existing = $head[$key] ?? null;
+
+            if ( $unique && $existing ) {
+                throw new InvalidArgumentException( 'Duplicate meta key found: '.$key );
+                // continue;
+            }
+
+            if ( \is_array( $meta ) ) {
+                foreach ( $meta as $attribute => $value ) {
+                    $meta[$attribute] = "{$attribute}=\"{$value}\"";
+                }
+                $meta = '<meta '.\implode( ' ', $meta ).'>';
+            }
+
+            if ( \is_string( $meta ) ) {
+                $head[$key] = $meta;
+            }
+        }
+
+        foreach ( [
+            ...$this->styles,
+            ...$this->scripts,
+            ...$this->links,
+        ] as $source ) {
+            $head[] = $source;
+        }
+        return $head;
     }
 
     public function render() : string
     {
-        return "<head>\n\t".\implode( "\n\t", $this->head )."\n</head>";
+        return "<head>\n\t".\implode( "\n\t", $this->array() )."\n</head>";
     }
 
     public function __toString() : string
     {
         // TODO : Sort before dump
         return $this->render();
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    protected function getDocumentMeta() : array
+    {
+        $meta = [];
+        if ( $this->title ) {
+            $meta['title'] = "<title>{$this->title}</title>";
+        }
+
+        if ( $this->description ) {
+            $meta['description'] = "<meta name=\"description\" content=\"{$this->description}\">";
+        }
+
+        if ( $this->keywords ) {
+            $keywords         = \implode( ' ', $this->keywords );
+            $meta['keywords'] = "<meta name=\"keywords\" content=\"{$keywords}\">";
+        }
+
+        if ( $this->author ) {
+            $meta['author'] = "<meta name=\"author\" content=\"{$this->author}\">";
+        }
+
+        return $meta;
     }
 }

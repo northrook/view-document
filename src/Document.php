@@ -119,50 +119,43 @@ final class Document implements ActionInterface
      */
     public function head( string|Stringable $html ) : self
     {
-        $this->head[] = $html;
+        $this->head->injectHtml( $html );
         return $this;
     }
 
     public function title( string $set ) : self
     {
-        $this->meta['title'] = $set;
+        $this->head->title( $set );
         return $this;
     }
 
     public function description( string $set ) : self
     {
-        $this->meta['description'] = $set;
+        $this->head->description( $set );
         return $this;
     }
 
     public function keywords( string ...$set ) : self
     {
-        $this->meta['keywords'] = $set;
+        $this->head->keywords( ...$set );
         return $this;
     }
 
     public function author( string $set ) : self
     {
-        $this->meta['author'] = $set;
+        $this->head->author( $set );
         return $this;
     }
 
-    public function meta( ?string $name = null, int|string|bool|Stringable ...$set ) : self
+    /**
+     * @param null|string                $name
+     * @param null|bool|float|int|string ...$set
+     *
+     * @return $this
+     */
+    public function meta( ?string $name = null, null|string|bool|int|float ...$set ) : self
     {
-        foreach ( $set as $key => $value ) {
-            $set[$key] = match ( true ) {
-                \is_bool( $value ) => $value ? 'true' : 'false',
-                default            => (string) $value,
-            };
-        }
-
-        /** @var string[] $set */
-        if ( $name ) {
-            $this->meta[$name] = $set;
-        }
-        else {
-            $this->meta[] = $set;
-        }
+        $this->head->meta( $name, ...$set );
         return $this;
     }
 
@@ -175,6 +168,52 @@ final class Document implements ActionInterface
         $this->robots ??= new Robots();
 
         // throw new NotSupportedException( 'TODO: '.__METHOD__ );
+        return $this;
+    }
+
+    /**
+     * @param ?string                                   $href
+     * @param ?string                                   $inline
+     * @param null|array<array-key, string>|bool|string ...$attributes
+     *
+     * @return self
+     */
+    public function styles(
+        ?string                   $href = null,
+        ?string                   $inline = null,
+        string|bool|array|null ...$attributes,
+    ) : self {
+        $this->head->styles( $href, $inline, ...$attributes );
+
+        return $this;
+    }
+
+    /**
+     * @param ?string                                   $src
+     * @param ?string                                   $inline
+     * @param null|array<array-key, string>|bool|string ...$attributes
+     *
+     * @return self
+     */
+    public function script(
+        ?string                   $src = null,
+        ?string                   $inline = null,
+        string|bool|array|null ...$attributes,
+    ) : self {
+        $this->head->script( $src, $inline, ...$attributes );
+        return $this;
+    }
+
+    /**
+     * @param string                                    $href
+     * @param null|array<array-key, string>|bool|string ...$attributes
+     *
+     * @return self
+     */
+    public function link( string $href, string|bool|array|null ...$attributes ) : self
+    {
+        $this->head->link( $href, ...$attributes );
+
         return $this;
     }
 
