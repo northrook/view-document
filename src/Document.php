@@ -7,7 +7,7 @@ namespace Core\View;
 use Core\Exception\NotSupportedException;
 use Core\Interface\ActionInterface;
 use Core\View\Document\{Body, Head, Robots};
-use Core\View\Html\Attributes;
+use Core\View\Element\Attributes;
 use Psr\Log\LoggerInterface;
 use Stringable;
 

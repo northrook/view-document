@@ -20,6 +20,7 @@ final class Head implements Stringable
 
     protected ?string $description = null;
 
+    /** @var array<string,string> */
     protected array $keywords = [];
 
     protected ?string $author = null;
@@ -169,7 +170,7 @@ final class Head implements Stringable
     }
 
     /**
-     * @return array<array-key, string>
+     * @return array<array-key, ?string>
      */
     public function array() : array
     {
@@ -210,6 +211,7 @@ final class Head implements Stringable
             ...$this->scripts,
             ...$this->links,
         ] as $source ) {
+            \assert( \is_string( $source ) );
             $head[] = $source;
         }
         return $head;
