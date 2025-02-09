@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Core\View;
 
-use Core\Exception\NotSupportedException;
-use Core\Interface\ActionInterface;
 use Core\View\Document\{Body, Head, Robots};
 use Core\View\Element\Attributes;
+use Core\Interface\ActionInterface;
 use Psr\Log\LoggerInterface;
 use Stringable;
+use Core\Exception\NotSupportedException;
 
 final class Document implements ActionInterface
 {

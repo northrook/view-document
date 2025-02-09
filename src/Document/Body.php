@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\View\Document;
 
-use Core\View\Html\Element;
+use Core\View\Element;
 
 /**
  * @internal

@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Core\View;
 
-use Core\View\Template\View;
 use Psr\Log\LoggerInterface;
 
-class DocumentView extends View
+class DocumentEngine
 {
     protected bool $contentOnly = false;
 
@@ -21,7 +20,14 @@ class DocumentView extends View
         return $this->contentOnly ? $this->renderContent() : $this->renderDocument();
     }
 
-    final public function setInnerHtml( string $content ) : DocumentView
+    final public function contentOnly( bool $set = true ) : self
+    {
+        $this->contentOnly = $set;
+
+        return $this;
+    }
+
+    final public function setInnerHtml( string $content ) : DocumentEngine
     {
         $this->document->body->content->set( 'innerHtml', $content );
         return $this;
