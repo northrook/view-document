@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Core\View\Document;
 
 use Core\Interface\{View};
-use Core\View\Element;
 use Stringable;
 use InvalidArgumentException;
 
@@ -26,19 +25,13 @@ final class Head extends View
 
     protected ?string $author = null;
 
-    /** @var string[] */
-    protected array $styles = [];
-
-    /** @var string[] */
-    protected array $scripts = [];
-
-    /** @var string[] */
-    protected array $links = [];
-
     /** @var array<array-key, array<array-key, null|bool|string>|string> */
     private array $head = [];
 
-    public function __construct() {}
+    public function __construct(
+        public readonly Assets $assets,
+        public readonly Robots $robots,
+    ) {}
 
     public function title( string $set ) : self
     {
@@ -104,63 +97,6 @@ final class Head extends View
         return $this;
     }
 
-    /**
-     * @param ?string                                   $href
-     * @param ?string                                   $inline
-     * @param null|array<array-key, string>|bool|string ...$attributes
-     *
-     * @return $this
-     */
-    public function styles(
-        ?string                   $href = null,
-        ?string                   $inline = null,
-        string|bool|array|null ...$attributes,
-    ) : self {
-        if ( ! ( $href ?? $inline ) ) {
-            throw new InvalidArgumentException( __METHOD__.' requires either $src or $inject.' );
-        }
-
-        $this->styles[] = Element::style( $href, $inline, ...$attributes );
-
-        return $this;
-    }
-
-    /**
-     * @param ?string                                   $src
-     * @param ?string                                   $inline
-     * @param null|array<array-key, string>|bool|string ...$attributes
-     *
-     * @return $this
-     */
-    public function script(
-        ?string                   $src = null,
-        ?string                   $inline = null,
-        string|bool|array|null ...$attributes,
-    ) : self {
-        if ( ! ( $src ?? $inline ) ) {
-            throw new InvalidArgumentException( __METHOD__.' requires either $src or $inject.' );
-        }
-
-        $this->scripts[] = Element::script( $src, $inline, ...$attributes );
-
-        return $this;
-    }
-
-    /**
-     * @param string                                    $href
-     * @param null|array<array-key, string>|bool|string ...$attributes
-     *
-     * @return $this
-     */
-    public function link(
-        string                    $href,
-        string|bool|array|null ...$attributes,
-    ) : Head {
-        $this->scripts[] = Element::link( $href, ...$attributes );
-
-        return $this;
-    }
-
     public function injectHtml( string|Stringable $html, ?string $key = null ) : self
     {
         $key ??= $html instanceof Stringable
@@ -207,14 +143,8 @@ final class Head extends View
             }
         }
 
-        foreach ( [
-            ...$this->styles,
-            ...$this->scripts,
-            ...$this->links,
-        ] as $source ) {
-            \assert( \is_string( $source ) );
-            $head[] = $source;
-        }
+        $head = [...$head, ...$this->assets->getResolvedAssets()];
+
         return $head;
     }
 

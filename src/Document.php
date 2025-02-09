@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\View;
 
-use Core\View\Document\{Body, Head, Robots};
+use Core\View\Document\{Assets, Body, Head, Robots};
 use Core\View\Element\Attributes;
 use Core\Interface\ActionInterface;
 use Psr\Log\LoggerInterface;
@@ -19,21 +19,28 @@ final class Document implements ActionInterface
     /** @var string[] `asset.key` format */
     protected array $enqueueAsset = [];
 
+    public readonly Assets $assets;
+
     public readonly Attributes $html;
 
     public readonly Body $body;
 
     public readonly Head $head;
 
-    protected readonly Robots $robots;
+    public readonly Robots $robots;
 
     /** @var bool Determines how indexing will be handled */
     public bool $isPublic = false;
 
     public function __construct( protected readonly ?LoggerInterface $logger = null )
     {
-        $this->html = new Attributes( ['lang' => 'en'] );
-        $this->head = new Head();
+        $this->html   = new Attributes( ['lang' => 'en'] );
+        $this->assets = new Assets();
+        $this->robots = new Robots();
+        $this->head   = new Head(
+            $this->assets,
+            $this->robots,
+        );
         $this->body = new Body();
     }
 
@@ -164,11 +171,8 @@ final class Document implements ActionInterface
         if ( $this->isLocked( __METHOD__ ) ) {
             return $this;
         }
-
-        $this->robots ??= new Robots();
-
-        // throw new NotSupportedException( 'TODO: '.__METHOD__ );
-        return $this;
+        throw new NotSupportedException( 'TODO: '.__METHOD__ );
+        // return $this;
     }
 
     /**
@@ -183,7 +187,7 @@ final class Document implements ActionInterface
         ?string                   $inline = null,
         string|bool|array|null ...$attributes,
     ) : self {
-        $this->head->styles( $href, $inline, ...$attributes );
+        $this->assets->addStyle( $href, $inline, ...$attributes );
 
         return $this;
     }
@@ -200,7 +204,7 @@ final class Document implements ActionInterface
         ?string                   $inline = null,
         string|bool|array|null ...$attributes,
     ) : self {
-        $this->head->script( $src, $inline, ...$attributes );
+        $this->assets->addScript( $src, $inline, ...$attributes );
         return $this;
     }
 
@@ -212,7 +216,7 @@ final class Document implements ActionInterface
      */
     public function link( string $href, string|bool|array|null ...$attributes ) : self
     {
-        $this->head->link( $href, ...$attributes );
+        $this->assets->addLink( $href, ...$attributes );
 
         return $this;
     }
@@ -223,9 +227,7 @@ final class Document implements ActionInterface
             return $this;
         }
 
-        foreach ( $enqueue as $asset ) {
-            $this->enqueueAsset[$asset] ??= $asset;
-        }
+        $this->assets->enqueue( ...$enqueue );
 
         return $this;
     }
