@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\View\Document;
 
+use Core\Interface\{View};
 use Core\View\Element;
 use Stringable;
 use InvalidArgumentException;
@@ -12,7 +13,7 @@ use InvalidArgumentException;
  * @internal
  * @author Martin Nielsen <mn@northrook.com>
  */
-final class Head implements Stringable
+final class Head extends View
 {
     private const array SINGLE_META = ['charset', 'viewport', 'description', 'keywords', 'author'];
 

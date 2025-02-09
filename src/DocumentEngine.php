@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Core\View;
 
+use Core\Interface\View;
 use Psr\Log\LoggerInterface;
+use Stringable;
 
-class DocumentEngine
+class DocumentEngine extends View
 {
     protected bool $contentOnly = false;
 
@@ -20,6 +22,15 @@ class DocumentEngine
         return $this->contentOnly ? $this->renderContent() : $this->renderDocument();
     }
 
+    /**
+     * Determine  method is used when {@see getHtml} or {@see __toString} is called:
+     * - `true` {@see renderContent}
+     * - `false` {@see renderDocument}
+     *
+     * @param bool $set
+     *
+     * @return $this
+     */
     final public function contentOnly( bool $set = true ) : self
     {
         $this->contentOnly = $set;
@@ -27,8 +38,18 @@ class DocumentEngine
         return $this;
     }
 
-    final public function setInnerHtml( string $content ) : DocumentEngine
+    /**
+     * Assign the `innerHtml` content.
+     *
+     * `<body ..>` attributes will be merged with `$this->document->body->`{@see Attributes}.
+     *
+     * @param string|Stringable $content
+     *
+     * @return $this
+     */
+    final public function setInnerHtml( string|Stringable $content ) : DocumentEngine
     {
+        // TODO : [mid] extract and merge merge body attributes
         $this->document->body->content->set( 'innerHtml', $content );
         return $this;
     }
