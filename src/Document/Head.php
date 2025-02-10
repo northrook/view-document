@@ -143,9 +143,7 @@ final class Head extends View
             }
         }
 
-        $head = [...$head, ...$this->assets->getResolvedAssets()];
-
-        return $head;
+        return [...$head, ...$this->assets->getResolvedAssets()];
     }
 
     public function render() : string
