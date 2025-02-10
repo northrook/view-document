@@ -150,7 +150,7 @@ final class Head extends View
 
     public function render() : string
     {
-        return "<head>\n\t".\implode( "\n\t", $this->array() )."\n</head>";
+        return "<head>\n\t".\implode( "\n\t", \array_filter( $this->array() ) )."\n</head>";
     }
 
     public function __toString() : string
