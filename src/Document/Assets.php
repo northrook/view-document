@@ -42,7 +42,7 @@ final class Assets
     }
 
     /**
-     * @return string[];
+     * @return string[]
      */
     public function getResolvedAssets() : array
     {
