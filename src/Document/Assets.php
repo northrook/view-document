@@ -2,6 +2,7 @@
 
 namespace Core\View\Document;
 
+use Core\Interface\ViewInterface;
 use Core\View\Element;
 use InvalidArgumentException;
 
@@ -58,6 +59,12 @@ final class Assets
         }
 
         return $assets;
+    }
+
+    public function add( ViewInterface $asset ) : self
+    {
+        $this->links[] = (string) $asset;
+        return $this;
     }
 
     /**

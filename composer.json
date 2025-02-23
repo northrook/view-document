@@ -25,7 +25,6 @@
     "northrook/view-element": "dev-main"
   },
   "require-dev": {
-    "northrook/php-cs": "dev-main",
-    "jetbrains/phpstorm-attributes": "^1.2"
+    "northrook/dev": "dev-main"
   }
 }
