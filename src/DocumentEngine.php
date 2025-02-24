@@ -75,11 +75,6 @@ class DocumentEngine extends View
 
     final protected function render( string ...$html ) : string
     {
-        $html = \implode( PHP_EOL, \array_filter( $html ) );
-
-        /** @noinspection PhpUnnecessaryLocalVariableInspection */
-        $html = \str_replace( '><', ">\n<", $html );
-
-        return $html;
+        return \implode( PHP_EOL, \array_filter( $html ) );
     }
 }
