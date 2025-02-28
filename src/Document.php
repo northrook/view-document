@@ -34,7 +34,7 @@ final class Document implements ActionInterface
 
     public function __construct( protected readonly ?LoggerInterface $logger = null )
     {
-        $this->html   = new Attributes( ['lang' => 'en'] );
+        $this->html   = new Attributes( lang : 'en' );
         $this->assets = new Assets();
         $this->robots = new Robots();
         $this->head   = new Head(
