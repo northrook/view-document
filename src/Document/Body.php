@@ -14,7 +14,7 @@ final class Body extends Element
 {
     public function __construct()
     {
-        parent::__construct( 'body', innerHtml : '' );
+        parent::__construct( 'body', ['innerHtml' => null] );
     }
 
     protected function build( string $separator = '' ) : string
