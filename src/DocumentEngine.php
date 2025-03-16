@@ -5,17 +5,33 @@ declare(strict_types=1);
 namespace Core\View;
 
 use Core\Interface\View;
-use Psr\Log\LoggerInterface;
+use Core\Profiler\Interface\Profilable;
+use Core\Profiler\StopwatchProfiler;
+use Psr\Log\{LoggerAwareInterface, LoggerInterface};
 use Stringable;
+use Symfony\Component\Stopwatch\Stopwatch;
 
-class DocumentEngine extends View
+class DocumentEngine extends View implements Profilable, LoggerAwareInterface
 {
+    use StopwatchProfiler;
+
+    protected readonly ?LoggerInterface $logger;
+
     protected bool $contentOnly = false;
 
-    public function __construct(
-        public readonly Document            $document,
-        protected readonly ?LoggerInterface $logger = null,
-    ) {}
+    public function __construct( public readonly Document $document ) {}
+
+    final public function setLogger( ?LoggerInterface $logger ) : void
+    {
+        $this->logger ??= $logger;
+    }
+
+    final public function setProfiler(
+        ?Stopwatch $stopwatch,
+        ?string    $category = null,
+    ) : void {
+        $this->assignProfiler( $stopwatch );
+    }
 
     final public function __toString() : string
     {
@@ -56,21 +72,29 @@ class DocumentEngine extends View
 
     final public function renderDocument() : string
     {
-        return $this->render(
+        $this->profiler?->event( __METHOD__ );
+        $document = $this->render(
             '<!DOCTYPE html>',
             "<html{$this->document->html}>",
             $this->document->head->render(),
             $this->document->body->render(),
             '</html>',
         );
+
+        $this->profiler?->stop( __METHOD__ );
+        return $document;
     }
 
     final public function renderContent() : string
     {
-        return $this->render(
+        $this->profiler?->event( __METHOD__ );
+        $content = $this->render(
             $this->document->head->render(),
             $this->document->body->render(),
         );
+
+        $this->profiler?->stop( __METHOD__ );
+        return $content;
     }
 
     final protected function render( string ...$html ) : string
