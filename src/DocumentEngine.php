@@ -28,9 +28,9 @@ class DocumentEngine extends View implements Profilable, LoggerAwareInterface
 
     final public function setProfiler(
         ?Stopwatch $stopwatch,
-        ?string    $category = null,
+        ?string    $category = 'Document',
     ) : void {
-        $this->assignProfiler( $stopwatch );
+        $this->assignProfiler( $stopwatch, $category );
     }
 
     final public function __toString() : string
