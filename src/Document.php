@@ -6,10 +6,15 @@ namespace Core\View;
 
 use Psr\Log\LoggerInterface;
 use Core\Interface\ActionInterface;
-use Core\View\Document\{Assets, Body, Head, Robots};
+use Core\View\Document\{
+    Assets,
+    Body,
+    Head,
+    Robots,
+};
 use Core\View\Element\Attributes;
-use Stringable;
 use Core\Exception\NotSupportedException;
+use Stringable;
 
 final class Document implements ActionInterface
 {

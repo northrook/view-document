@@ -7,9 +7,12 @@ namespace Core\View;
 use Core\Interface\View;
 use Core\Profiler\Interface\Profilable;
 use Core\Profiler\StopwatchProfiler;
-use Psr\Log\{LoggerAwareInterface, LoggerInterface};
-use Stringable;
 use Symfony\Component\Stopwatch\Stopwatch;
+use Psr\Log\{
+    LoggerAwareInterface,
+    LoggerInterface,
+};
+use Stringable;
 
 class DocumentEngine extends View implements Profilable, LoggerAwareInterface
 {
@@ -72,7 +75,7 @@ class DocumentEngine extends View implements Profilable, LoggerAwareInterface
 
     final public function renderDocument() : string
     {
-        $this->profiler?->event( __METHOD__ );
+        $profiler = $this->profiler?->event( 'render' );
         $document = $this->render(
             '<!DOCTYPE html>',
             "<html{$this->document->html}>",
@@ -80,20 +83,18 @@ class DocumentEngine extends View implements Profilable, LoggerAwareInterface
             $this->document->body->render(),
             '</html>',
         );
-
-        $this->profiler?->stop( __METHOD__ );
+        $profiler?->stop();
         return $document;
     }
 
     final public function renderContent() : string
     {
-        $this->profiler?->event( __METHOD__ );
-        $content = $this->render(
+        $profiler = $this->profiler?->event( 'render.content' );
+        $content  = $this->render(
             $this->document->head->render(),
             $this->document->body->render(),
         );
-
-        $this->profiler?->stop( __METHOD__ );
+        $profiler?->stop();
         return $content;
     }
 
