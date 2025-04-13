@@ -69,7 +69,7 @@ class DocumentEngine extends View implements Profilable, LoggerAwareInterface
     final public function setInnerHtml( string|Stringable $content ) : DocumentEngine
     {
         // TODO : [mid] extract and merge merge body attributes
-        $this->document->body->content->set( 'innerHtml', $content );
+        $this->document->body->content->set( $content, 'innerHtml' );
         return $this;
     }
 

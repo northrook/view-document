@@ -109,7 +109,7 @@ final class Document implements ActionInterface
             return $this;
         }
 
-        $this->html->add(
+        $this->html->merge(
             [
                 'id'     => $id,
                 'class'  => $class,
@@ -243,22 +243,26 @@ final class Document implements ActionInterface
         // return $this;
     }
 
+    /**
+     * @param null|string $id
+     * @param null|string $class
+     * @param mixed       ...$attributes
+     *
+     * @return $this
+     */
     public function body(
-        ?string            $id = null,
-        ?string            $class = null,
-        bool|int|string ...$attributes,
+        ?string  $id = null,
+        ?string  $class = null,
+        mixed ...$attributes,
     ) : self {
         if ( $this->isLocked( __METHOD__ ) ) {
             return $this;
         }
 
-        $this->body->attributes->add(
-            [
-                'id'    => $id,
-                'class' => $class,
-                ...$attributes,
-            ],
-        );
+        $this->body->attributes
+            ->id( $id )
+            ->class( $class )
+            ->merge( $attributes );
 
         return $this;
     }
