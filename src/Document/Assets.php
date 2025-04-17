@@ -5,6 +5,7 @@ namespace Core\View\Document;
 use Core\Interface\ViewInterface;
 use Core\View\Element;
 use InvalidArgumentException;
+use Stringable;
 
 final class Assets
 {
@@ -54,8 +55,8 @@ final class Assets
             ...$this->scripts,
             ...$this->links,
         ] as $source ) {
-            \assert( \is_string( $source ) );
-            $assets[] = $source;
+            \assert( \is_string( $source ) || $source instanceof Stringable );
+            $assets[] = (string) $source;
         }
 
         return $assets;

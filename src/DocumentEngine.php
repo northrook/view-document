@@ -60,7 +60,7 @@ class DocumentEngine extends View implements Profilable, LoggerAwareInterface
     /**
      * Assign the `innerHtml` content.
      *
-     * `<body ..>` attributes will be merged with `$this->document->body->`{@see Attributes}.
+     * `<body ...>` attributes will be merged with `$this->document->body->`{@see Attributes}.
      *
      * @param string|Stringable $content
      *
