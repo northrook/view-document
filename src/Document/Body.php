@@ -17,19 +17,15 @@ final class Body extends Element
         parent::__construct( tag : 'body', content : ['innerHtml' => null] );
     }
 
-    protected function build( string $separator = '' ) : string
+    protected function build() : void
     {
-        if ( $this->tag->isSelfClosing() ) {
-            return $this->tag->getOpeningTag( $this->attributes );
+        $content = $this->content->getString();
+
+        if ( $this->hasBodyElement( $content ) ) {
+            $this->attributes->merge( Element\Attributes::extract( $content, true ) );
         }
 
-        $body = \implode( '', $this->content->getArray() );
-
-        if ( $this->hasBodyElement( $body ) ) {
-            $this->attributes->merge( Element\Attributes::extract( $body, true ) );
-        }
-
-        return $this->tag->getOpeningTag( $this->attributes ).$body.$this->tag->getClosingTag();
+        $this->content->set( $content );
     }
 
     private function hasBodyElement( string $html ) : bool
