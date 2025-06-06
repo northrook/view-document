@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\View;
 
-use Psr\Log\LoggerInterface;
+use Core\Autowire\Logger;
 use Core\Interface\ActionInterface;
 use Core\View\Document\{
     Assets,
@@ -18,6 +18,8 @@ use Stringable;
 
 final class Document implements ActionInterface
 {
+    use Logger;
+
     /** @var bool automatically locked when read. */
     private bool $locked = false;
 
@@ -37,7 +39,7 @@ final class Document implements ActionInterface
     /** @var bool Determines how indexing will be handled */
     public bool $isPublic = false;
 
-    public function __construct( protected readonly ?LoggerInterface $logger = null )
+    public function __construct()
     {
         $this->html   = new Attributes( lang : 'en' );
         $this->assets = new Assets();
@@ -273,9 +275,10 @@ final class Document implements ActionInterface
             return false;
         }
 
-        $this->logger?->error(
-            'The {caller} is locked. No further changes can be made at this time.',
-            ['caller' => $method, 'document' => $this],
+        $this->log(
+            message : 'The {caller} is locked. No further changes can be made at this time.',
+            context : ['caller' => $method, 'document' => $this],
+            level   : 'error',
         );
 
         return true;

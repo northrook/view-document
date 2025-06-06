@@ -4,37 +4,22 @@ declare(strict_types=1);
 
 namespace Core\View;
 
+use Core\Autowire\{Logger, Profiler};
 use Core\Interface\View;
-use Core\Profiler\Interface\Profilable;
-use Core\Profiler\StopwatchProfiler;
-use Symfony\Component\Stopwatch\Stopwatch;
 use Psr\Log\{
-    LoggerAwareInterface,
     LoggerInterface,
 };
 use Stringable;
 
-class DocumentEngine extends View implements Profilable, LoggerAwareInterface
+class DocumentEngine extends View
 {
-    use StopwatchProfiler;
+    use Profiler, Logger;
 
     protected readonly ?LoggerInterface $logger;
 
     protected bool $contentOnly = false;
 
     public function __construct( public readonly Document $document ) {}
-
-    final public function setLogger( ?LoggerInterface $logger ) : void
-    {
-        $this->logger ??= $logger;
-    }
-
-    final public function setProfiler(
-        ?Stopwatch $stopwatch,
-        ?string    $category = 'Document',
-    ) : void {
-        $this->assignProfiler( $stopwatch, $category );
-    }
 
     final public function __toString() : string
     {
@@ -75,7 +60,7 @@ class DocumentEngine extends View implements Profilable, LoggerAwareInterface
 
     final public function renderDocument() : string
     {
-        $profiler = $this->profiler?->event( 'render' );
+        $this->profilerStart( 'render.document' );
         $document = $this->render(
             '<!DOCTYPE html>',
             "<html{$this->document->html}>",
@@ -83,18 +68,18 @@ class DocumentEngine extends View implements Profilable, LoggerAwareInterface
             $this->document->body->render(),
             '</html>',
         );
-        $profiler?->stop();
+        $this->profilerStop( 'render.document' );
         return $document;
     }
 
     final public function renderContent() : string
     {
-        $profiler = $this->profiler?->event( 'render.content' );
-        $content  = $this->render(
+        $this->profilerStart( 'render.content' );
+        $content = $this->render(
             $this->document->head->render(),
             $this->document->body->render(),
         );
-        $profiler?->stop();
+        $this->profilerStop( 'render.content' );
         return $content;
     }
 
