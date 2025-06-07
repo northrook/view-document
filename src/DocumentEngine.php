@@ -6,16 +6,11 @@ namespace Core\View;
 
 use Core\Autowire\{Logger, Profiler};
 use Core\Interface\View;
-use Psr\Log\{
-    LoggerInterface,
-};
 use Stringable;
 
 class DocumentEngine extends View
 {
     use Profiler, Logger;
-
-    protected readonly ?LoggerInterface $logger;
 
     protected bool $contentOnly = false;
 
